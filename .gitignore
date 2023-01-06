@@ -130,3 +130,9 @@ dmypy.json
 
 # poetry
 poetry.lock
+
+# ignore replit config files
+.config/
+.replit
+replit.nix
+.upm/

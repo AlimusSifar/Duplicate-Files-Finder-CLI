@@ -12,6 +12,10 @@ colorama = "^0.4.6"  # for colored outputs in the terminal
 
 > Either execute `pip install -r requirements.txt` or execute `poetry install` in the repository directory.
 
+### Replit.com
+
+> Fork the [Repl](https://replit.com/@AlimusSifar/Duplicate-Files-Finder-CLI) and open the replit `shell`. Then execute the CLI commands. By default the help command will be displayed if you run directly using the `Run` button in replit.
+
 ```md
 main.py [-h] [-i] [-r] [-v] directories [directories ...]
 
@@ -52,20 +56,20 @@ E:\\tutorials
 ### Output
 
 ```terminal
-Search subdirectories recursively:................True
+Search subdirectories recursively:..............True
 
-Include hidden files and directories:............False
+Include hidden files and directories:..........False
 
-Verbosity:...........................................0
+Verbosity:.........................................0
 
 Selected directories to search for duplicate files:
   E:\tutorials
 
-Total number of files:...............................7
+Total number of files:.............................7
 
-Number of unique files:..............................6
+Number of unique files:............................6
 
-Number of duplicate files:...........................1
+Number of duplicate files:.........................1
 
 Duplicate files by hash:
 {
@@ -75,5 +79,5 @@ Duplicate files by hash:
   ]
 }
 
-*For more details, run the code with `-v` or `--verbose` with a value greater than 0
+*For more details, run the code with `-v` or `-vv` etc.
 ```

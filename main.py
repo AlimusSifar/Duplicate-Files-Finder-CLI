@@ -9,7 +9,7 @@ from colorama import init, Fore
 init(autoreset=True)
 
 
-def group_files_by_hash(files: Iterator[tuple[str, str]]):
+def group_files_by_hash(files: 'Iterator[tuple[str, str]]'):
     """
     Group files by hash
 
@@ -23,7 +23,7 @@ def group_files_by_hash(files: Iterator[tuple[str, str]]):
     `dict[str, list[str]]`
         A dictionary containing the file hash as the key and a list of file paths as the value
     """
-    files_by_hash: dict[str, list[str]] = {}
+    files_by_hash: 'dict[str, list[str]]' = {}
 
     # Iterate over the list of tuples
     for file_hash, file_path in files:
@@ -74,7 +74,8 @@ def get_file_hash(file_path: str, chunk_size=10240):
     return file_hash
 
 
-def get_subdirs_files(recursive: bool,  includeHidden: bool, directories: Iterator[str]):
+def get_subdirs_files(recursive: bool, includeHidden: bool,
+                      directories: 'Iterator[str]'):
     """
     Get subdirectories and file paths
 
@@ -99,8 +100,8 @@ def get_subdirs_files(recursive: bool,  includeHidden: bool, directories: Iterat
         '__pycache__',
     )
 
-    subdirectories: set[str] = set()
-    file_paths: set[str] = set()
+    subdirectories: 'set[str]' = set()
+    file_paths: 'set[str]' = set()
 
     for directory in directories:
         for root, dirs, files in os.walk(directory):
@@ -156,12 +157,26 @@ def parse_cli_args():
     parser = argparse.ArgumentParser()
 
     # Add optional arguments
-    parser.add_argument('-i', '--include-hidden', action='store_true', help='include hidden files and directories')
-    parser.add_argument('-r', '--recursive', action='store_true', help='search subdirectories recursively')
-    parser.add_argument('-v', '--verbose', action='count', default=0, help='increase output verbosity')
+    parser.add_argument('-i',
+                        '--include-hidden',
+                        action='store_true',
+                        help='include hidden files and directories')
+    parser.add_argument('-r',
+                        '--recursive',
+                        action='store_true',
+                        help='search subdirectories recursively')
+    parser.add_argument(
+        '-v',
+        '--verbose',
+        action='count',
+        default=0,
+        help='increase output verbosity; e.g. -v, -vv, -vvv, etc.')
 
     # Add positional arguments
-    parser.add_argument('directories', nargs='+', help='one or more directories to search for duplicate files')
+    parser.add_argument(
+        'dirs',
+        nargs='+',
+        help='one or more directories to search for duplicate files')
 
     # Parse the arguments
     args = parser.parse_args()
@@ -170,17 +185,24 @@ def parse_cli_args():
     recursive: bool = args.recursive
     include_hidden: bool = args.include_hidden
     verbose: int = args.verbose
-    directories: Iterator[str] = iter(args.directories)
+    dirs: 'Iterator[str]' = iter(args.dirs)
 
     # Print the arguments if verbose is greater than 0
     # if verbose > 0:
-    print(f'{Fore.YELLOW}Search subdirectories recursively:{args.recursive.__str__():.>20}', end='\n\n')
-    print(f'{Fore.YELLOW}Include hidden files and directories:{args.include_hidden.__str__():.>17}', end='\n\n')
-    print(f'{Fore.YELLOW}Verbosity:{args.verbose.__str__():.>44}', end='\n\n')
-    print(f'{Fore.YELLOW}Selected directories to search for duplicate files:\n  ' +
-          '\n  '.join(args.directories).__str__(), end='\n\n')
+    print(
+        f'{Fore.YELLOW}{"Search subdirectories recursively: ":.<47}{args.recursive.__str__():.>5}',
+        end='\n\n')
+    print(
+        f'{Fore.YELLOW}{"Include hidden files and directories:":.<47}{args.include_hidden.__str__():.>5}',
+        end='\n\n')
+    print(f'{Fore.YELLOW}{"Verbosity:":.<47}{args.verbose.__str__():.>5}',
+          end='\n\n')
+    print(
+        f'{Fore.YELLOW}Selected directories to search for duplicate files:\n  '
+        + '\n  '.join(args.dirs).__str__(),
+        end='\n\n')
 
-    return recursive, include_hidden, verbose, directories
+    return recursive, include_hidden, verbose, dirs
 
 
 def main():
@@ -189,47 +211,66 @@ def main():
     """
 
     # Parse the command line arguments
-    recursive, include_hidden, verbose, directories = parse_cli_args()
+    recursive, include_hidden, verbose, dirs = parse_cli_args()
 
     # Get the subdirectories
-    subdirectories, file_paths = get_subdirs_files(recursive, include_hidden, directories)
-    subdirectories, file_paths = sorted(list(subdirectories)), sorted(list(file_paths))
+    subdirectories, file_paths = get_subdirs_files(recursive, include_hidden,
+                                                   dirs)
+    subdirectories, file_paths = sorted(list(subdirectories)), sorted(
+        list(file_paths))
 
     # Print the subdirectories and file paths if verbose is greater than 1
     if verbose > 1:
         # print(Fore.YELLOW + 'Subdirectories:\n  ' + '\n  '.join(subdirectories), end='\n\n')
-        print(Fore.YELLOW + 'File paths:\n  ' + '\n  '.join(file_paths), end='\n\n')
+        print(Fore.YELLOW + 'File paths:\n  ' + '\n  '.join(file_paths),
+              end='\n\n')
 
     # Print the number of subdirectories and file paths
     # print(Fore.YELLOW + 'Total number of subdirectories: ' + len(subdirectories).__str__(), end='\n\n')
-    print(Fore.GREEN + f'Total number of files:{len(file_paths).__str__():.>32}', end='\n\n')
+    print(Fore.GREEN +
+          f'{"Total number of files:":.<47}{len(file_paths).__str__():.>5}',
+          end='\n\n')
 
     # Get the hash of each file in a list
-    file_hashes_with_paths = ((get_file_hash(file_path), file_path) for file_path in file_paths)
+    file_hashes_with_paths = ((get_file_hash(file_path), file_path)
+                              for file_path in file_paths)
 
     # Group the file paths by hash
     files_by_hash = group_files_by_hash(file_hashes_with_paths)
 
     # Print the files by hash with json if verbose is greater than 1
-    if verbose > 1:
-        print(Fore.YELLOW + 'Files by hash:\n' + json.dumps(files_by_hash, indent=2), end='\n\n')
+    if verbose > 0:
+        print(Fore.YELLOW + 'Files by hash:\n' +
+              json.dumps(files_by_hash, indent=2),
+              end='\n\n')
 
     # Get the number of unique and duplicate files
     unique_len = len(files_by_hash)
     duplicate_len = len(file_paths) - unique_len
 
     # Print the number of unique and duplicate files
-    print(Fore.GREEN + f'Number of unique files:{unique_len.__str__():.>31}', end='\n\n')
-    print(Fore.GREEN + f'Number of duplicate files:{duplicate_len.__str__():.>28}', end='\n\n')
+    print(Fore.GREEN +
+          f'{"Number of unique files:":.<47}{unique_len.__str__():.>5}',
+          end='\n\n')
+    print(Fore.GREEN +
+          f'{"Number of duplicate files:":.<47}{duplicate_len.__str__():.>5}',
+          end='\n\n')
 
     # ignore the files with only one path
-    files_by_hash = {hash: paths for hash, paths in files_by_hash.items() if len(paths) > 1}
+    files_by_hash = {
+        hash: paths
+        for hash, paths in files_by_hash.items() if len(paths) > 1
+    }
 
     # Print the files by hash with json
-    print(Fore.GREEN + 'Duplicate files by hash:\n' + json.dumps(files_by_hash, indent=2), end='\n\n')
+    print(Fore.GREEN + 'Duplicate files by hash:\n' +
+          json.dumps(files_by_hash, indent=2),
+          end='\n\n')
 
     # Exit the program
-    print(f"{Fore.YELLOW}*For more details, run the code with `-v` or `--verbose` with a value greater than 0")
+    print(
+        f"{Fore.YELLOW}*For more details, run the code with `-v` or `-vv` etc."
+    )
     print('Exiting program...')
 
 
